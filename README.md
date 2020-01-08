@@ -11,7 +11,7 @@ This tool is for those who made his own script for linux and then want to upload
 - Upload package to mentors.debian.net
 
 ### # How to install?
-run install.sh
+run install.sh with `sh install.sh`
 
 ### # Pre-Requested
 - You need to have a gpg key in your machine. If not make using `gpg --gen-key`
