@@ -1,0 +1,103 @@
+#!/bin/bash
+breaker(){
+	echo -e "\e[38;2;255;0;0m[ERROR] : $1!\e[0m"
+	exit
+}
+
+error_breaker(){
+	if [ $? -ne 0 ] 
+	then 
+		echo -e "\e[38;2;255;0;0m[ERROR] : $1!\e[0m"
+		exit
+	fi
+}
+
+info(){
+	echo -e "\e[38;2;0;150;0m[INFO] : $1!\e[0m"
+}
+
+ask(){
+	echo -e "\e[38;2;150;150;0m[INFO] : $1!\e[0m"
+}
+
+
+echo -e "Debian Project Maker by \e[38;2;100;200;0mYE HTET HEIN\e[0m"
+
+if [ $# = 0 ];
+then
+
+	echo "Enter project name"
+	read project_name
+
+	echo "Enter version"
+	read version
+
+	info "Checking scripts..."
+	if [ ! "$(ls -A ./)" ]; then
+	     breaker "Your scripts must have copy in this folder first"
+	fi
+
+	info "Initializing Directory"
+	shopt -s extglob
+	mkdir $project_name-$version $project_name-$version/scripts 
+	cp !($project_name-$version) $project_name-$version/scripts/ &&
+	cd $project_name-$version/ &&
+	dh_make -y --indep --createorig &&
+
+	info "Building install file..."
+	touch debian/INSTALL &&
+
+	for file in scripts/*;
+	do
+		echo $(basename $file) /usr/bin/ >> debian/INSTALL
+		cp $file $(basename $file)
+	done
+
+	rm -rf scripts
+
+	info ""
+	info "Debian folder created." 
+	read -p  "You can edit these files as you need and press any key to continue..."
+
+	info "Commiting changes..."
+	dpkg-source --commit &&
+	error_breaker "commiting error!"
+
+	info "Compiling resources..."
+	dpkg-buildpackage -us -uc &&
+	error_breaker "compiling error!"
+
+
+	ask "Do you want to upload this package to mentors.debian.net?[y/n]"
+	read upload
+
+	if [[ $upload == "Y" || $upload == "y" ]];
+	then
+		gpg --list-secret-keys --keyid-format LONG &&
+		ask "Select one of key from above and paste below"
+		read key
+
+		info "Signing package with GPG key..."
+		debsign -k $key ../*.changes &&
+		error_breaker "bad key!"
+
+		info "Uploading..."
+		dput mentors ../*.changes 
+		info "Uploaded!"
+	fi
+
+	echo "DONE!"
+
+
+elif [ $1 == "--help" ];
+	then
+
+
+
+else
+
+fi
+
+
+
+
