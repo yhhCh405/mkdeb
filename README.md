@@ -20,6 +20,7 @@ run install.sh with `sh install.sh`
 ### # How to use?
 - Create a folder. Copy the script files that you just developed to that folder.
 - Open terminal in that directory and run `mkdeb`
+- Follow the instruction
 
 ## That's it!
 Thanks. 
